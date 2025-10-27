@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/tabAFragment"
+        android:title="Pokédex"
+        android:icon="@drawable/ic_pokeball" />
+    <item
+        android:id="@+id/tabBFragment"
+        android:title="Favorites"
+        android:icon="@drawable/ic_star" />
+</menu>
