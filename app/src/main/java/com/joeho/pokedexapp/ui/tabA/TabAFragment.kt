@@ -14,7 +14,6 @@ import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.joeho.pokedex.R
-import com.joeho.pokedexapp.data.local.PokemonEntity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -30,17 +29,22 @@ class TabAFragment : Fragment(R.layout.fragment_tab_a) {
         val search = view.findViewById<EditText>(R.id.searchInput)
         val progress = view.findViewById<ProgressBar>(R.id.progressBar)
 
-        adapter = PokemonAdapter { pokemon ->
-            findNavController().navigate(
-                R.id.action_tabAFragment_to_pokemonDetailFragment,
-                Bundle().apply { putString("name", pokemon.name) }
-            )
-        }
+        adapter = PokemonAdapter(
+            onClick = { pokemon ->
+                findNavController().navigate(
+                    R.id.action_tabAFragment_to_pokemonDetailFragment,
+                    Bundle().apply { putString("name", pokemon.name) }
+                )
+            },
+            onFavoriteClick = { pokemon ->
+                viewModel.toggleFavorite(pokemon.name)
+            }
+        )
 
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = adapter
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.pokemon.collectLatest {
                 adapter.submitData(it)
             }
