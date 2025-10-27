@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.joeho.pokedex.databinding.ItemPokemonBinding
 import com.joeho.pokedexapp.data.local.PokemonEntity
+import com.joeho.pokedex.R
 
 class PokemonAdapter(
-    private val onClick: (PokemonEntity) -> Unit
+    private val onClick: (PokemonEntity) -> Unit,
+    private val onFavoriteClick: (PokemonEntity) -> Unit
 ) : PagingDataAdapter<PokemonEntity, PokemonAdapter.ViewHolder>(DiffCallback()) {
 
     inner class ViewHolder(private val binding: ItemPokemonBinding) :
@@ -20,6 +22,16 @@ class PokemonAdapter(
             binding.textType.text = item.types
             binding.imageView.load(item.imageUrl)
             binding.root.setOnClickListener { onClick(item) }
+            val context = binding.root.context
+            val favoriteIcon = if (item.isFavorite) R.drawable.ic_star else R.drawable.ic_star_border
+            binding.favoriteIcon.setImageResource(favoriteIcon)
+            val contentDescription = if (item.isFavorite) {
+                context.getString(R.string.favorite_remove)
+            } else {
+                context.getString(R.string.favorite_add)
+            }
+            binding.favoriteIcon.contentDescription = contentDescription
+            binding.favoriteIcon.setOnClickListener { onFavoriteClick(item) }
         }
     }
 

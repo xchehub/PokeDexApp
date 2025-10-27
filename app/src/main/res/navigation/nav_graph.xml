@@ -19,7 +19,11 @@
         android:id="@+id/tabBFragment"
         android:name="com.joeho.pokedexapp.ui.tabB.TabBFragment"
         android:label="Favorites"
-        tools:layout="@layout/fragment_tab_b" />
+        tools:layout="@layout/fragment_tab_b">
+        <action
+            android:id="@+id/action_tabBFragment_to_pokemonDetailFragment"
+            app:destination="@id/pokemonDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/pokemonDetailFragment"

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,5 +30,11 @@ class TabAViewModel @Inject constructor(
 
     fun updateQuery(text: String) {
         _query.value = text
+    }
+
+    fun toggleFavorite(name: String) {
+        viewModelScope.launch {
+            repository.toggleFavorite(name)
+        }
     }
 }
