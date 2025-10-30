@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.joeho.pokedexapp.data.local.PokemonEntity
 import com.joeho.pokedexapp.data.remote.PokeApiService
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -17,6 +18,8 @@ class PokemonRemoteMediator(
     private val api: PokeApiService,
     private val repository: PokemonRepository
 ) : RemoteMediator<Int, PokemonEntity>() {
+
+    private val logger = KotlinLogging.logger {}
 
     override suspend fun load(
         loadType: LoadType,
@@ -31,7 +34,6 @@ class PokemonRemoteMediator(
 
             val response = api.getPokemonList(limit = PAGE_SIZE, offset = offset)
             val pokemonList = coroutineScope {
-                // Limit concurrent detail requests to avoid rate limiting
                 val semaphore = Semaphore(permits = MAX_CONCURRENT_REQUESTS)
                 response.results.map { item ->
                     async {
@@ -44,6 +46,7 @@ class PokemonRemoteMediator(
                                     types = detail.types.joinToString(", ") { it.type.name }
                                 )
                             } catch (t: Throwable) {
+                                logger.error(t) { "Failed to load detail for ${item.name}" }
                                 null
                             }
                         }
@@ -58,6 +61,7 @@ class PokemonRemoteMediator(
 
             MediatorResult.Success(endOfPaginationReached = pokemonList.isEmpty())
         } catch (e: Exception) {
+            logger.error(e) { "RemoteMediator load failed with ${e.message}" }
             MediatorResult.Error(e)
         }
     }
