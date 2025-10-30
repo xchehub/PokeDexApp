@@ -4,4 +4,6 @@
     <string name="favorite_remove">Remove from favorites</string>
     <string name="favorites_empty">No favorite Pokémon yet</string>
     <string name="back">Back</string>
+    <string name="detail_loading">Loading…</string>
+    <string name="detail_error">Failed to load details</string>
 </resources>
