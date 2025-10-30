@@ -1,3 +1,9 @@
+\# Local dev notes
+pokedex-vibe-coding-history.md
+
+# Build output
+build/
+app/build/
 # Compiled class file
 *.class
 

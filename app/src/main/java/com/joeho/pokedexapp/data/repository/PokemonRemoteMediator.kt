@@ -6,6 +6,11 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.joeho.pokedexapp.data.local.PokemonEntity
 import com.joeho.pokedexapp.data.remote.PokeApiService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 @OptIn(ExperimentalPagingApi::class)
 class PokemonRemoteMediator(
@@ -25,13 +30,25 @@ class PokemonRemoteMediator(
             }
 
             val response = api.getPokemonList(limit = PAGE_SIZE, offset = offset)
-            val pokemonList = response.results.map { item ->
-                val detail = api.getPokemonDetail(item.name)
-                PokemonEntity(
-                    name = detail.name,
-                    imageUrl = detail.sprites.front_default,
-                    types = detail.types.joinToString(", ") { it.type.name }
-                )
+            val pokemonList = coroutineScope {
+                // Limit concurrent detail requests to avoid rate limiting
+                val semaphore = Semaphore(permits = MAX_CONCURRENT_REQUESTS)
+                response.results.map { item ->
+                    async {
+                        semaphore.withPermit {
+                            try {
+                                val detail = api.getPokemonDetail(item.name)
+                                PokemonEntity(
+                                    name = detail.name,
+                                    imageUrl = detail.sprites.front_default,
+                                    types = detail.types.joinToString(", ") { it.type.name }
+                                )
+                            } catch (t: Throwable) {
+                                null
+                            }
+                        }
+                    }
+                }.awaitAll().filterNotNull()
             }
 
             repository.savePokemon(
@@ -47,5 +64,6 @@ class PokemonRemoteMediator(
 
     companion object {
         private const val PAGE_SIZE = PokemonRepository.PAGE_SIZE
+        private const val MAX_CONCURRENT_REQUESTS = 4
     }
 }
