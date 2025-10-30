@@ -49,7 +49,7 @@ object AppModule {
     @Singleton
     fun provideDatabase(@ApplicationContext app: Context): AppDatabase =
         Room.databaseBuilder(app, AppDatabase::class.java, "pokedex.db")
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .build()
 
     @Provides

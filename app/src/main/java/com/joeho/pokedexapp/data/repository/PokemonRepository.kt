@@ -24,7 +24,7 @@ class PokemonRepository @Inject constructor(
     fun getPagedPokemon(): Flow<PagingData<PokemonEntity>> =
         Pager(
             config = PagingConfig(pageSize = PAGE_SIZE),
-            remoteMediator = PokemonRemoteMediator(api, this),
+            remoteMediator = PokemonRemoteMediator(api, db, this),
             pagingSourceFactory = { pokemonDao.searchPokemon("") }
         ).flow
 
