@@ -10,6 +10,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.File
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -22,12 +24,28 @@ object AppModule {
 
     private const val BASE_URL = "https://pokeapi.co/api/v2/"
 
+    private val logger = KotlinLogging.logger {}
+
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient =
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient =
         OkHttpClient.Builder()
+            .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+            .cache(okhttp3.Cache(File(context.cacheDir, "okhttpCache"), 4L * 1024 * 1024)) // 4MB
+            .addInterceptor { chain ->
+                val userAgent = "PokeDexApp/1.0 (Android)"
+                val request = chain.request().newBuilder()
+                    .header("User-Agent", userAgent)
+                    .build()
+                chain.proceed(request)
+            }
             .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+                level = if (BuildConfig.DEBUG)
+                    HttpLoggingInterceptor.Level.BASIC
+                else
+                    HttpLoggingInterceptor.Level.NONE
             })
             .build()
 

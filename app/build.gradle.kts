@@ -72,6 +72,9 @@ dependencies {
     // Paging3
     implementation("androidx.paging:paging-runtime-ktx:3.3.2")
 
+    // Kotlin Logging
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+
     // Coil
     implementation("io.coil-kt:coil:2.7.0")
 

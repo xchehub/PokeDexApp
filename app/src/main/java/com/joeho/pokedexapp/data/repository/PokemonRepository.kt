@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.joeho.pokedexapp.data.local.AppDatabase
 import com.joeho.pokedexapp.data.local.PokemonEntity
 import com.joeho.pokedexapp.data.remote.PokeApiService
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,7 +48,14 @@ class PokemonRepository @Inject constructor(
 
     fun observePokemon(name: String): Flow<PokemonEntity?> = pokemonDao.observePokemon(name)
 
-    suspend fun getPokemonDetail(name: String) = api.getPokemonDetail(name)
+    private val logger = KotlinLogging.logger {}
+
+    suspend fun getPokemonDetail(name: String) = try {
+        api.getPokemonDetail(name)
+    } catch (e: Exception) {
+        logger.error(e) { "getPokemonDetail failed for $name: ${e.message}" }
+        throw e
+    }
 
     internal suspend fun savePokemon(
         pokemon: List<PokemonEntity>,
